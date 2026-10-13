@@ -9,86 +9,46 @@
 </head>
 <body>
     <header>
-        <a href="index.html" aria-label="Northfold Product Page">Northfold Page</a>
-        <nav>
+        <a href="index.html" class="brand" aria-label="Northfold home">Northfold</a>
+        <nav aria-label="Main">
             <ul>
                 <li><a href="#product">Shop</a></li>
                 <li><a href="#benefits">Our values</a></li>
             </ul>
         </nav>
+        <button type="button" id="cart-link" aria-controls="cart-drawer">Cart (<span id="cart-count">0</span>)</button>
     </header>
     
 <main>
     <section id="product" class="product">
 
-        <div class="product-gallery">
-           
-        <img
-            src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSvnhcEApC5g1uYsFASo4oXCJz9QS5zAO0eC2tvWxYnhA&s=10"
-            alt="Placeholder image representing the Oat glaze mug"
-        />
+        <div id="status" role="status" aria-live="polite">Loading product…</div>
 
-        <img
-            src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTV2SBk6nz166rU90NMwMFfOJ4aquw3y47yHiAgBKGHuQ&s"
-            alt="Placeholder image representing the Slate glaze mug"
-        />
-
-        <img
-            src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQnBXoQmecMx9vWpDRkdk9KdQDDJlyvz8AAnH9_MiVs2Q&s=10"
-            alt="Placeholder image representing the Moss glaze mug"
-        />
-
+        <div class="product-gallery" id="gallery" hidden>
+            <img id="main-image" src="" alt="">
+            <ul id="thumbs" class="thumbs"></ul>
         </div>
 
-        <div class="product-details">
+        <div class="product-details" id="details" hidden>
             <p class="eyebrow">EVERYDAY ESSENTIALS</p>
+            <h1 id="title"></h1>
+            <p class="price" id="price"></p>
+            <p class="description" id="description"></p>
 
-            <h1>Northfold Stoneware Mug</h1>
+            <form id="product-form">
+                <fieldset>
+                    <legend>Option: <span id="variant-name"></span></legend>
+                    <div id="variants"></div>
+                </fieldset>
 
-            <p class="price">$28</p>
+                <div class="quantity-field">
+                    <label for="quantity">Quantity</label>
+                    <input type="number" id="quantity" name="quantity" min="1" value="1" required>
+                </div>
 
-            <p class="description">
-                A thoughtfully crafted stoneware mug
-                for your everyday rituals.
-            </p>
-
-            
-<form>
-    <fieldset>
-        <legend>Choose your glaze</legend>
-
-        <label>
-            <input type="radio" name="glaze" value="oat" checked>
-            Oat
-        </label>
-
-        <label>
-            <input type="radio" name="glaze" value="slate">
-            Slate
-        </label>
-
-        <label>
-            <input type="radio" name="glaze" value="moss">
-            Moss
-        </label>
-    </fieldset>
-
-    <div class="quantity-field">
-        <label for="quantity">Quantity</label>
-        <input
-            type="number"
-            id="quantity"
-            name="quantity"
-            min="1"
-            value="1"
-            required
-        >
-    </div>
-
-    <button type="button">Add to cart</button>
-</form>
-
-
+                <button type="submit">Add to cart</button>
+                <p id="added" role="status" aria-live="polite"></p>
+            </form>
         </div>
 
     </section>
@@ -119,8 +79,12 @@
     <p>&copy; 2026 Northfold. All rights reserved.</p>
 </footer>
 
-</main>
 
-
+<aside id="cart-drawer" aria-label="Shopping cart" hidden>
+    <div class="drawer-head"><h2>Your cart</h2><button type="button" id="cart-close">Close</button></div>
+    <ul id="cart-items"></ul>
+    <p class="cart-total">Subtotal: <strong id="cart-subtotal"></strong></p>
+</aside>
+<script type="module" src="script.js"></script>
 </body>
 </html>
