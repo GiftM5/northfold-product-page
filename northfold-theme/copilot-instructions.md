@@ -1,1 +1,0 @@
-/home/mpho/Activate-talent/northfold-product-page/northfold-theme/AGENTS.md
