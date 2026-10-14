@@ -27,7 +27,7 @@
       <div class="northfold-product__details">
         <h1>{{ product.title | escape }}</h1>
 
-        <p class="northfold-product__price">
+        <p class="northfold-product__price" aria-live="polite">
           {{ product.selected_or_first_available_variant.price | money }}
         </p>
 
@@ -54,6 +54,8 @@
               {% for variant in product.variants %}
                 <option
                   value="{{ variant.id }}"
+                  data-price="{{ variant.price | money | escape }}"
+                  data-available="{{ variant.available }}"
                   {% if variant.id == product.selected_or_first_available_variant.id %}
                     selected
                   {% endif %}
@@ -62,6 +64,7 @@
                   {% endunless %}
                 >
                   {{ variant.title | escape }}
+                  — {{ variant.price | money }}
                   {% unless variant.available %}
                     - Sold out
                   {% endunless %}
@@ -101,24 +104,34 @@
     </div>
   {% endif %}
 
-  <div class="northfold-product__benefits">
-    {% if section.settings.benefits_heading != blank %}
-      <h2>{{ section.settings.benefits_heading | escape }}</h2>
-    {% endif %}
-
-    <div class="northfold-product__benefit-list">
-      {% for block in section.blocks %}
-        <article
-          class="northfold-product__benefit"
-          {{ block.shopify_attributes }}
-        >
-          <h3>{{ block.settings.title | escape }}</h3>
-          <p>{{ block.settings.text | escape }}</p>
-        </article>
-      {% endfor %}
-    </div>
-  </div>
+  {% render 'northfold-benefits',
+    heading: section.settings.benefits_heading,
+    blocks: section.blocks
+  %}
 </section>
+
+{% javascript %}
+  document.addEventListener('change', (event) => {
+    const variantSelect = event.target;
+
+    if (!(variantSelect instanceof HTMLSelectElement) || variantSelect.name !== 'id') {
+      return;
+    }
+
+    const productSection = variantSelect.closest('.northfold-product');
+    const selectedOption = variantSelect.selectedOptions[0];
+    const price = productSection?.querySelector('.northfold-product__price');
+    const submitButton = productSection?.querySelector('button[name="add"]');
+
+    if (!productSection || !selectedOption || !price || !submitButton) {
+      return;
+    }
+
+    price.textContent = selectedOption.dataset.price ?? '';
+    submitButton.disabled = selectedOption.dataset.available !== 'true';
+    submitButton.textContent = submitButton.disabled ? 'Sold out' : 'Add to cart';
+  });
+{% endjavascript %}
 
 {% stylesheet %}
   .northfold-product {
