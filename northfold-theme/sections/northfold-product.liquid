@@ -1,104 +1,146 @@
+{% assign current_variant = product.selected_or_first_available_variant %}
+{% assign product_form_id = 'NorthfoldProductForm-' | append: section.id %}
 
 <section
-  class="northfold-product"
-  style="background-color: {{ section.settings.background_color }};"
+  id="product"
+  class="northfold-product full-width"
+  style="--northfold-product-background: {{ section.settings.background_color }};"
 >
   {% if product == blank %}
-    <p>Please select a product to preview this section.</p>
+    <p class="northfold-product__empty">Please select a product to preview this section.</p>
   {% else %}
     <div class="northfold-product__layout">
-      <div class="northfold-product__gallery">
-        {% for image in product.images %}
-          <div class="northfold-product__image">
-            {{
-              image
-              | image_url: width: 1200
-              | image_tag:
-                widths: '360, 540, 720, 960, 1200',
-                sizes: '(min-width: 750px) 55vw, 100vw',
-                alt: image.alt
-            }}
+      <div class="northfold-product__gallery" aria-label="Product images">
+        {% if product.images.size > 0 %}
+          <div class="northfold-product__thumbs">
+            {% for image in product.images %}
+              <button
+                class="northfold-product__thumb"
+                type="button"
+                aria-label="Show image {{ forloop.index }} of {{ product.images.size }}"
+                aria-pressed="{% if forloop.first %}true{% else %}false{% endif %}"
+                data-gallery-target="NorthfoldImage-{{ section.id }}-{{ forloop.index }}"
+              >
+                {{
+                  image
+                  | image_url: width: 160
+                  | image_tag:
+                    widths: '64, 96, 128, 160',
+                    sizes: '64px',
+                    alt: '',
+                    loading: 'lazy'
+                }}
+              </button>
+            {% endfor %}
+          </div>
+
+          <div class="northfold-product__main-images">
+            {% for image in product.images %}
+              <div
+                id="NorthfoldImage-{{ section.id }}-{{ forloop.index }}"
+                class="northfold-product__main-image"
+                {% unless forloop.first %}
+                  hidden
+                {% endunless %}
+              >
+                {{
+                  image
+                  | image_url: width: 1600
+                  | image_tag:
+                    widths: '360, 540, 720, 960, 1200, 1600',
+                    sizes: '(min-width: 750px) min(58vw, 820px), calc(100vw - 40px)',
+                    alt: image.alt,
+                    loading: 'lazy'
+                }}
+              </div>
+            {% endfor %}
           </div>
         {% else %}
-          <p>No product images are available.</p>
-        {% endfor %}
+          <p class="northfold-product__no-images">No product images are available.</p>
+        {% endif %}
       </div>
 
       <div class="northfold-product__details">
+        <p class="northfold-product__eyebrow">Everyday essentials</p>
         <h1>{{ product.title | escape }}</h1>
 
         <p class="northfold-product__price" aria-live="polite">
-          {{ product.selected_or_first_available_variant.price | money }}
+          {{ current_variant.price | money }}
         </p>
 
         <div class="northfold-product__description">
           {{ product.description }}
         </div>
 
-        {% form 'product', product %}
+        {% form 'product', product, id: product_form_id %}
           {% if product.has_only_default_variant %}
-            <input
-              type="hidden"
-              name="id"
-              value="{{ product.selected_or_first_available_variant.id }}"
-            >
+            <input type="hidden" name="id" value="{{ current_variant.id }}">
           {% else %}
-            <label for="NorthfoldVariant-{{ section.id }}">
-              Choose an option
-            </label>
+            <fieldset class="northfold-product__options">
+              <legend>
+                Option:
+                <span class="northfold-product__variant-name">
+                  {{ current_variant.title | escape }}
+                </span>
+              </legend>
 
-            <select
-              id="NorthfoldVariant-{{ section.id }}"
-              name="id"
-            >
-              {% for variant in product.variants %}
-                <option
-                  value="{{ variant.id }}"
-                  data-price="{{ variant.price | money | escape }}"
-                  data-available="{{ variant.available }}"
-                  {% if variant.id == product.selected_or_first_available_variant.id %}
-                    selected
-                  {% endif %}
-                  {% unless variant.available %}
-                    disabled
-                  {% endunless %}
-                >
-                  {{ variant.title | escape }}
-                  — {{ variant.price | money }}
-                  {% unless variant.available %}
-                    - Sold out
-                  {% endunless %}
-                </option>
-              {% endfor %}
-            </select>
+              <div class="northfold-product__variants">
+                {% for variant in product.variants %}
+                  <label
+                    class="northfold-product__variant"
+                    for="NorthfoldVariant-{{ section.id }}-{{ forloop.index }}"
+                  >
+                    <input
+                      id="NorthfoldVariant-{{ section.id }}-{{ forloop.index }}"
+                      type="radio"
+                      name="id"
+                      value="{{ variant.id }}"
+                      data-price="{{ variant.price | money | escape }}"
+                      data-available="{{ variant.available }}"
+                      data-title="{{ variant.title | escape }}"
+                      {% if variant.id == current_variant.id %}
+                        checked
+                      {% endif %}
+                      {% unless variant.available %}
+                        disabled
+                      {% endunless %}
+                    >
+                    <span>{{ variant.title | escape }}</span>
+                  </label>
+                {% endfor %}
+              </div>
+            </fieldset>
           {% endif %}
 
           {% if section.settings.show_quantity %}
-            <label for="NorthfoldQuantity-{{ section.id }}">
-              Quantity
-            </label>
-            <input
-              id="NorthfoldQuantity-{{ section.id }}"
-              type="number"
-              name="quantity"
-              min="1"
-              value="1"
-            >
+            <div class="northfold-product__quantity">
+              <label for="NorthfoldQuantity-{{ section.id }}">Quantity</label>
+              <input
+                id="NorthfoldQuantity-{{ section.id }}"
+                type="number"
+                name="quantity"
+                min="1"
+                value="1"
+                required
+              >
+            </div>
           {% endif %}
 
           <button
+            class="northfold-product__submit"
             type="submit"
             name="add"
-            {% unless product.selected_or_first_available_variant.available %}
+            {% unless current_variant.available %}
               disabled
             {% endunless %}
           >
-            {% if product.selected_or_first_available_variant.available %}
+            {% if current_variant.available %}
               Add to cart
             {% else %}
               Sold out
             {% endif %}
           </button>
+          <p class="northfold-product__added" role="status" aria-live="polite"></p>
         {% endform %}
       </div>
     </div>
@@ -111,122 +153,362 @@
 </section>
 
 {% javascript %}
+  document.addEventListener('click', (event) => {
+    const button = event.target.closest('.northfold-product__thumb');
+
+    if (!button) {
+      return;
+    }
+
+    const gallery = button.closest('.northfold-product__gallery');
+    const targetId = button.dataset.galleryTarget;
+    const targetImage = targetId ? document.getElementById(targetId) : null;
+
+    if (!gallery || !targetImage || !gallery.contains(targetImage)) {
+      return;
+    }
+
+    gallery.querySelectorAll('.northfold-product__main-image').forEach((image) => {
+      image.hidden = image !== targetImage;
+    });
+    gallery.querySelectorAll('.northfold-product__thumb').forEach((thumb) => {
+      thumb.setAttribute('aria-pressed', String(thumb === button));
+    });
+  });
+
   document.addEventListener('change', (event) => {
-    const variantSelect = event.target;
+    const input = event.target;
 
-    if (!(variantSelect instanceof HTMLSelectElement) || variantSelect.name !== 'id') {
+    if (!(input instanceof HTMLInputElement) || input.type !== 'radio' || input.name !== 'id') {
       return;
     }
 
-    const productSection = variantSelect.closest('.northfold-product');
-    const selectedOption = variantSelect.selectedOptions[0];
+    const productSection = input.closest('.northfold-product');
     const price = productSection?.querySelector('.northfold-product__price');
-    const submitButton = productSection?.querySelector('button[name="add"]');
+    const variantName = productSection?.querySelector('.northfold-product__variant-name');
+    const submitButton = productSection?.querySelector('.northfold-product__submit');
 
-    if (!productSection || !selectedOption || !price || !submitButton) {
+    if (!price || !variantName || !submitButton) {
       return;
     }
 
-    price.textContent = selectedOption.dataset.price ?? '';
-    submitButton.disabled = selectedOption.dataset.available !== 'true';
+    price.textContent = input.dataset.price ?? '';
+    variantName.textContent = input.dataset.title ?? '';
+    submitButton.disabled = input.dataset.available !== 'true';
     submitButton.textContent = submitButton.disabled ? 'Sold out' : 'Add to cart';
   });
 {% endjavascript %}
 
 {% stylesheet %}
   .northfold-product {
-    padding: 32px 5%;
+    --northfold-color-background: #fff;
+    --northfold-color-surface: #f5f5f3;
+    --northfold-color-text: #1a1a1a;
+    --northfold-color-muted: #5f5f5a;
+    --northfold-color-border: #dcdcd6;
+    --northfold-color-focus: #1d5fd1;
+    --northfold-space-small: 8px;
+    --northfold-space-medium: 16px;
+    --northfold-space-large: 32px;
+    --northfold-space-xl: 56px;
+    --northfold-radius-small: 8px;
+    --northfold-radius-pill: 999px;
+    background: var(--northfold-product-background, #fff);
+    color: var(--northfold-color-text);
+    line-height: 1.5;
+    padding-top: var(--northfold-space-large);
+  }
+
+  .northfold-product__layout,
+  .northfold-product__benefits {
+    width: min(calc(100% - 40px), 1280px);
+    margin-inline: auto;
   }
 
   .northfold-product__layout {
     display: grid;
-    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
-    gap: 40px;
-    max-width: 1200px;
-    margin: 0 auto;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    gap: var(--northfold-space-xl);
+    align-items: start;
+    padding-bottom: var(--northfold-space-xl);
   }
 
   .northfold-product__gallery {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 16px;
-    align-content: start;
-  }
-
-  .northfold-product__image:first-child {
-    grid-column: 1 / -1;
-  }
-
-  .northfold-product__image img {
-    display: block;
-    width: 100%;
-    height: auto;
-    border-radius: 8px;
-  }
-
-  .northfold-product__details {
+    grid-template-columns: 80px minmax(0, 1fr);
+    gap: var(--northfold-space-medium);
+    align-items: start;
     min-width: 0;
   }
 
+  .northfold-product__thumbs {
+    grid-column: 1;
+    grid-row: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--northfold-space-small);
+  }
+
+  .northfold-product__thumb {
+    display: block;
+    width: 100%;
+    padding: 0;
+    overflow: hidden;
+    border: 2px solid transparent;
+    border-radius: var(--northfold-radius-small);
+    background: var(--northfold-color-surface);
+    cursor: pointer;
+  }
+
+  .northfold-product__thumb:hover {
+    border-color: var(--northfold-color-border);
+  }
+
+  .northfold-product__thumb[aria-pressed='true'] {
+    border-color: var(--northfold-color-text);
+  }
+
+  .northfold-product__thumb img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+  }
+
+  .northfold-product__main-images {
+    grid-column: 2;
+    grid-row: 1;
+    min-width: 0;
+  }
+
+  .northfold-product__main-image img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: var(--northfold-radius-small);
+    background: var(--northfold-color-surface);
+  }
+
+  .northfold-product__details {
+    position: sticky;
+    top: var(--northfold-space-medium);
+    min-width: 0;
+  }
+
+  .northfold-product__eyebrow {
+    margin: 0;
+    color: var(--northfold-color-muted);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .northfold-product__details h1 {
+    margin: var(--northfold-space-small) 0;
+    font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+    line-height: 1.15;
+  }
+
   .northfold-product__price {
-    font-size: 1.4rem;
-    font-weight: 700;
+    margin: 0 0 var(--northfold-space-medium);
+    font-size: 1.5rem;
+    font-weight: 600;
   }
 
   .northfold-product__description {
-    line-height: 1.6;
+    max-width: 55ch;
+    margin-bottom: var(--northfold-space-large);
+    color: var(--northfold-color-muted);
   }
 
   .northfold-product__details form {
     display: grid;
-    gap: 12px;
-    margin-top: 24px;
+    gap: var(--northfold-space-medium);
   }
 
-  .northfold-product__details select,
-  .northfold-product__details input,
-  .northfold-product__details button {
-    box-sizing: border-box;
-    width: 100%;
-    max-width: 100%;
-    padding: 12px;
-    font: inherit;
+  .northfold-product__options {
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
   }
 
-  .northfold-product__details button {
+  .northfold-product__options legend {
+    margin-bottom: var(--northfold-space-small);
+    padding: 0;
+    font-weight: 600;
+  }
+
+  .northfold-product__variant-name {
+    color: var(--northfold-color-muted);
+    font-weight: 400;
+  }
+
+  .northfold-product__variants {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--northfold-space-small);
+  }
+
+  .northfold-product__variant {
+    position: relative;
     cursor: pointer;
   }
 
+  .northfold-product__variant input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .northfold-product__variant span {
+    display: block;
+    padding: 10px 18px;
+    border: 1px solid var(--northfold-color-border);
+    border-radius: var(--northfold-radius-pill);
+    font-size: 0.95rem;
+  }
+
+  .northfold-product__variant:hover span {
+    border-color: var(--northfold-color-text);
+  }
+
+  .northfold-product__variant input:checked + span {
+    border-color: var(--northfold-color-text);
+    background: var(--northfold-color-text);
+    color: var(--northfold-color-background);
+  }
+
+  .northfold-product__variant input:focus-visible + span {
+    outline: 3px solid var(--northfold-color-focus);
+    outline-offset: 3px;
+  }
+
+  .northfold-product__variant input:disabled + span {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .northfold-product__quantity {
+    display: grid;
+    gap: var(--northfold-space-small);
+  }
+
+  .northfold-product__quantity label {
+    font-weight: 600;
+  }
+
+  .northfold-product__quantity input {
+    box-sizing: border-box;
+    width: 120px;
+    max-width: 100%;
+    padding: 12px;
+    border: 1px solid var(--northfold-color-border);
+    border-radius: var(--northfold-radius-small);
+    background: var(--northfold-color-background);
+    color: var(--northfold-color-text);
+    font: inherit;
+  }
+
+  .northfold-product__submit {
+    width: 100%;
+    padding: 16px 20px;
+    border: 0;
+    border-radius: var(--northfold-radius-pill);
+    background: var(--northfold-color-text);
+    color: var(--northfold-color-background);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .northfold-product__submit:hover {
+    opacity: 0.85;
+  }
+
+  .northfold-product__submit:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+
+  .northfold-product__added {
+    min-height: 1.5em;
+    margin: 0;
+    color: var(--northfold-color-muted);
+    font-size: 0.9rem;
+  }
+
   .northfold-product__benefits {
-    max-width: 1200px;
-    margin: 48px auto 0;
+    padding-block: var(--northfold-space-xl);
+    border-top: 1px solid var(--northfold-color-border);
   }
 
   .northfold-product__benefits h2 {
+    margin: 0 0 var(--northfold-space-large);
     text-align: center;
   }
 
   .northfold-product__benefit-list {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 24px;
+    gap: var(--northfold-space-medium);
   }
 
   .northfold-product__benefit {
-    padding: 16px;
-    border: 1px solid currentColor;
-    border-radius: 8px;
+    padding: var(--northfold-space-large);
+    border-radius: var(--northfold-radius-small);
+    background: var(--northfold-color-surface);
+  }
+
+  .northfold-product__benefit h3 {
+    margin: 0 0 var(--northfold-space-medium);
+  }
+
+  .northfold-product__benefit p {
+    margin-bottom: 0;
+    color: var(--northfold-color-muted);
   }
 
   .northfold-product :focus-visible {
-    outline: 3px solid currentColor;
-    outline-offset: 4px;
+    outline-color: var(--northfold-color-focus);
+    outline-offset: 3px;
   }
 
   @media screen and (max-width: 749px) {
     .northfold-product__layout {
       grid-template-columns: minmax(0, 1fr);
-      gap: 24px;
+      gap: var(--northfold-space-large);
+    }
+
+    .northfold-product__details {
+      position: static;
+    }
+
+    .northfold-product__gallery {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .northfold-product__thumbs {
+      grid-column: 1;
+      grid-row: 2;
+      flex-direction: row;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .northfold-product__thumb {
+      flex: 0 0 64px;
+    }
+
+    .northfold-product__main-images {
+      grid-column: 1;
+      grid-row: 1;
     }
 
     .northfold-product__benefit-list {
@@ -249,7 +531,7 @@
       "type": "color",
       "id": "background_color",
       "label": "Background colour",
-      "default": "#F8F6F1"
+      "default": "#FFFFFF"
     },
     {
       "type": "checkbox",
