@@ -1,10 +1,10 @@
 /* Layout and appearance. Colours and spacing are defined once as custom properties. */
 :root {
     --color-background: #ffffff;
-    --color-surface: #f5f5f3;
-    --color-text: #1a1a1a;
-    --color-muted: #5f5f5a;
-    --color-accent: #1a1a1a;
+    --color-surface: #f3f3f3;
+    --color-text: #121212;
+    --color-muted: #6b6b6b;
+    --color-accent: #121212;
     --color-on-accent: #ffffff;
     --color-border: #dcdcd6;
     --color-error: #a12d2d;
@@ -15,8 +15,8 @@
     --space-large: 32px;
     --space-xl: 56px;
 
-    --radius-small: 8px;
-    --radius-pill: 999px;
+    --radius-small: 0;
+    --radius-pill: 0;
     --page-width: 1280px;
 }
 
@@ -42,7 +42,7 @@ body {
     margin: 0;
     background: var(--color-background);
     color: var(--color-text);
-    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
     line-height: 1.5;
 }
 
@@ -66,7 +66,8 @@ header {
 .brand {
     font-size: 1.4rem;
     font-weight: 700;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
     text-decoration: none;
 }
 
@@ -106,7 +107,7 @@ main {
     grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
     gap: var(--space-xl);
     align-items: start;
-    padding-block: var(--space-large) var(--space-xl);
+    padding-block: var(--space-medium) var(--space-xl);
 }
 
 #status {
@@ -183,6 +184,8 @@ main {
 
 h1 {
     margin: var(--space-small) 0;
+    font-weight: 600;
+    letter-spacing: -0.02em;
     font-size: clamp(1.8rem, 3.5vw, 2.6rem);
     line-height: 1.15;
 }
@@ -309,7 +312,7 @@ footer p { margin: 0; }
     border-left: 1px solid var(--color-border);
     box-shadow: -8px 0 24px rgba(0, 0, 0, 0.2);
     overflow-y: auto;
-    z-index: 10;
+    z-index: 100;
 }
 .drawer-head { display: flex; justify-content: space-between; align-items: center; }
 .drawer-head h2 { margin: 0; }
@@ -322,8 +325,40 @@ footer p { margin: 0; }
     border-radius: var(--radius-pill);
     cursor: pointer;
 }
-#cart-items { list-style: none; padding: 0; }
-#cart-items li { padding: var(--space-small) 0; border-bottom: 1px solid var(--color-border); }
+.cart-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.4); z-index: 99; }
+#cart-items { list-style: none; padding: 0; margin: var(--space-medium) 0; }
+.cart-item {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: var(--space-medium);
+    padding: var(--space-medium) 0;
+    border-bottom: 1px solid var(--color-border);
+}
+.cart-item p { margin: 0; }
+.cart-item-title { font-weight: 600; }
+.cart-item-variant { color: var(--color-muted); font-size: 0.85rem; margin-bottom: var(--space-small) !important; }
+.cart-item-side { display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between; }
+.cart-item-price { font-weight: 500; }
+.btn-remove {
+    font: inherit; font-size: 0.85rem;
+    background: none; border: 0; padding: 0;
+    color: var(--color-muted);
+    text-decoration: underline;
+    cursor: pointer;
+}
+.btn-remove:hover { color: var(--color-error); }
+.qty-stepper { display: inline-flex; align-items: center; border: 1px solid var(--color-border); }
+.qty-stepper button {
+    width: 32px; height: 32px;
+    background: none; border: 0;
+    font: inherit; font-size: 1.1rem;
+    color: var(--color-text);
+    cursor: pointer;
+}
+.qty-stepper button:hover { background: var(--color-surface); }
+.qty-stepper span { min-width: 32px; text-align: center; font-size: 0.9rem; }
+.empty-cart-msg { color: var(--color-muted); text-align: center; border: 0 !important; padding: var(--space-large) 0; }
+.cart-total { display: flex; justify-content: space-between; font-size: 1.1rem; }
 
 /* One column below 750px */
 @media (max-width: 749px) {

@@ -5,6 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Northfold Product Page</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -80,10 +83,11 @@
 </footer>
 
 
+<div id="cart-overlay" class="cart-overlay" hidden></div>
 <aside id="cart-drawer" aria-label="Shopping cart" hidden>
     <div class="drawer-head"><h2>Your cart</h2><button type="button" id="cart-close">Close</button></div>
     <ul id="cart-items"></ul>
-    <p class="cart-total">Subtotal: <strong id="cart-subtotal"></strong></p>
+    <p class="cart-total"><span>Subtotal</span> <strong id="cart-subtotal"></strong></p>
 </aside>
 <script type="module" src="script.js"></script>
 </body>
