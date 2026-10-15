@@ -67,9 +67,15 @@
         <p class="northfold-product__price" aria-live="polite">
           {{ current_variant.price | money }}
         </p>
-        {% assign shipping_threshold = section.settings.free_shipping_threshold | times: 100 %}
+{% assign shipping_threshold = section.settings.free_shipping_threshold | times: 100 %}
 {% assign shipping_remaining = shipping_threshold | minus: cart.total_price %}
-{% assign shipping_progress = cart.total_price | times: 100.0 | divided_by: shipping_threshold | at_most: 100 %}
+{% assign shipping_progress = 0 %}
+
+{% if shipping_threshold == 0 or cart.total_price >= shipping_threshold %}
+  {% assign shipping_progress = 100 %}
+{% else %}
+  {% assign shipping_progress = cart.total_price | times: 100.0 | divided_by: shipping_threshold | at_most: 100 %}
+{% endif %}
 
 <div
   class="northfold-shipping"
