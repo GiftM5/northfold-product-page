@@ -11,12 +11,21 @@ This project is a Shopify storefront theme developed for a snowboard store. It p
 - Responsive storefront layout.
 - Product imagery and descriptions.
 - Theme preview for reviewing changes before publication.
+- AJAX add-to-cart using Shopify's Cart API without reloading the page.
+- Header cart count updates and shopper feedback after adding items.
+- Error messages for failed add-to-cart requests.
+- Free-shipping progress bar showing the remaining amount or a success message.
+- Configurable free-shipping threshold through the Shopify theme editor, with a default of $60.
+- Initial progress rendered with Liquid using `cart.total_price` and updated after cart changes.
+- Accessible progress indicator with a labelled progress element and `aria-live` announcements.
+- Cart API URLs built using `window.Shopify.routes.root` for locale-aware storefronts.
 
 ## Technologies
 
 - Shopify Liquid
 - HTML
 - CSS
+- JavaScript
 - JSON
 - Shopify CLI
 
@@ -26,7 +35,9 @@ This project is a Shopify storefront theme developed for a snowboard store. It p
 2. Navigate to the theme directory.
 3. Push the theme as an unpublished theme:
 
-   `shopify theme push --unpublished`
+   ```bash
+   shopify theme push --unpublished
+   ```
 
 4. Preview the theme and test its appearance and functionality before submitting.
 
@@ -40,4 +51,8 @@ This project is intended to be reviewed through an unpublished theme and preview
 - Verify that all storefront copy relates to snowboarding.
 - Test the layout at desktop and mobile widths.
 - Check navigation and product interactions.
+- Verify AJAX add-to-cart, cart count updates and success/error feedback.
+- Verify the free-shipping threshold and progress bar.
+- Confirm the threshold can be changed in the theme editor.
+- Confirm the progress bar updates without reloading the page.
 - Confirm the theme remains unpublished.
