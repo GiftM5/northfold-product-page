@@ -228,6 +228,138 @@
     submitButton.disabled = input.dataset.available !== 'true';
     submitButton.textContent = submitButton.disabled ? 'Sold out' : 'Add to cart';
   });
+
+  document.addEventListener('submit', async (event) => {
+  const form = event.target;
+
+  if (!(form instanceof HTMLFormElement)) {
+    return;
+  }
+
+  const productSection = form.closest('.northfold-product');
+
+  if (!productSection) {
+    return;
+  }
+
+  event.preventDefault();
+
+  const submitButton = form.querySelector('.northfold-product__submit');
+  const status = form.querySelector('.northfold-product__added');
+
+  if (!submitButton || !status || submitButton.disabled) {
+    return;
+  }
+
+  const originalButtonText = submitButton.textContent.trim();
+  submitButton.disabled = true;
+  submitButton.textContent = 'Adding…';
+  status.textContent = '';
+
+  try {
+    const formData = new FormData(form);
+
+    if (!formData.has('quantity')) {
+      formData.set('quantity', '1');
+    }
+
+    const addResponse = await fetch(
+      `${window.Shopify.routes.root}cart/add.js`,
+      {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json'
+        },
+        body: formData
+      }
+    );
+
+    const addResult = await addResponse.json();
+
+    if (!addResponse.ok) {
+      throw new Error(
+        addResult.description ||
+        addResult.message ||
+        'We could not add this item to your cart.'
+      );
+    }
+
+    status.textContent = 'Added to cart successfully!';
+
+    try {
+      const cartResponse = await fetch(
+        `${window.Shopify.routes.root}cart.js`,
+        {
+          headers: {
+            Accept: 'application/json'
+          }
+        }
+      );
+
+      if (!cartResponse.ok) {
+        throw new Error('Could not refresh cart details.');
+      }
+
+      const cart = await cartResponse.json();
+
+      document.querySelectorAll('[data-cart-count]').forEach((count) => {
+        count.textContent = cart.item_count;
+      });
+
+      const shippingBar = document.querySelector('.northfold-shipping');
+
+      if (shippingBar) {
+        const threshold = Number(shippingBar.dataset.shippingThreshold);
+        const total = Number(cart.total_price);
+        const message = shippingBar.querySelector('[data-shipping-message]');
+        const progress = shippingBar.querySelector('[data-shipping-progress]');
+
+        if (message && progress && Number.isFinite(threshold) && threshold >= 0) {
+          const reached = threshold === 0 || total >= threshold;
+          const remaining = Math.max(0, threshold - total);
+          const percentage = threshold === 0
+            ? 100
+            : Math.min(100, (total / threshold) * 100);
+
+          const currency = window.Shopify.currency?.active || 'USD';
+          const formatter = new Intl.NumberFormat(undefined, {
+            style: 'currency',
+            currency
+          });
+
+          message.textContent = reached
+            ? "You've unlocked free shipping!"
+            : `You are ${formatter.format(remaining / 100)} away from free shipping.`;
+
+          progress.max = 100;
+          progress.value = percentage;
+          progress.textContent = `${Math.round(percentage)}%`;
+        }
+      }
+    } catch (refreshError) {
+      console.error('Cart refresh failed:', refreshError);
+    }
+  } catch (error) {
+    status.textContent = error instanceof Error
+      ? error.message
+      : 'Something went wrong. Please try again.';
+  } finally {
+    submitButton.disabled = false;
+
+    const selectedVariant = form.querySelector('[name="id"]:checked')
+      || form.querySelector('[name="id"]');
+
+    const available = selectedVariant instanceof HTMLInputElement
+      ? selectedVariant.dataset.available !== 'false'
+      : true;
+
+    submitButton.textContent = available
+      ? originalButtonText === 'Adding…' ? 'Add to cart' : originalButtonText
+      : 'Sold out';
+
+    submitButton.disabled = !available;
+  }
+});
 {% endjavascript %}
 
 {% stylesheet %}
