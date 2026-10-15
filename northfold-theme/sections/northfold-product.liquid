@@ -370,22 +370,31 @@
 
 {% stylesheet %}
   .northfold-product {
-    --northfold-color-background: #fff;
-    --northfold-color-surface: #f5f5f3;
-    --northfold-color-text: #1a1a1a;
-    --northfold-color-muted: #5f5f5a;
-    --northfold-color-border: #dcdcd6;
-    --northfold-color-focus: #1d5fd1;
+    --northfold-color-background: var(--color-background);
+    --northfold-color-surface: var(--color-surface);
+    --northfold-color-text: var(--color-foreground);
+    --northfold-color-muted: var(--color-muted);
+    --northfold-color-border: var(--color-border);
+    --northfold-color-focus: var(--color-focus);
+    --northfold-color-accent: var(--color-accent);
+    --northfold-color-on-accent: var(--color-on-accent);
     --northfold-space-small: 8px;
     --northfold-space-medium: 16px;
     --northfold-space-large: 32px;
     --northfold-space-xl: 56px;
-    --northfold-radius-small: 8px;
-    --northfold-radius-pill: 999px;
-    background: var(--northfold-product-background, #fff);
+    --northfold-radius-small: 0;
+    --northfold-radius-pill: 0;
+    background: var(--northfold-product-background, var(--northfold-color-background));
     color: var(--northfold-color-text);
+    font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
     line-height: 1.5;
-    padding-top: var(--northfold-space-large);
+    padding-top: var(--northfold-space-medium);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .northfold-product {
+      background: var(--northfold-color-background);
+    }
   }
 
   .northfold-product__layout,
@@ -477,6 +486,8 @@
   .northfold-product__details h1 {
     margin: var(--northfold-space-small) 0;
     font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+    font-weight: 600;
+    letter-spacing: -0.02em;
     line-height: 1.15;
   }
 
@@ -549,9 +560,9 @@
   }
 
   .northfold-product__variant input:checked + span {
-    border-color: var(--northfold-color-text);
-    background: var(--northfold-color-text);
-    color: var(--northfold-color-background);
+    border-color: var(--northfold-color-accent);
+    background: var(--northfold-color-accent);
+    color: var(--northfold-color-on-accent);
   }
 
   .northfold-product__variant input:focus-visible + span {
@@ -590,8 +601,8 @@
     padding: 16px 20px;
     border: 0;
     border-radius: var(--northfold-radius-pill);
-    background: var(--northfold-color-text);
-    color: var(--northfold-color-background);
+    background: var(--northfold-color-accent);
+    color: var(--northfold-color-on-accent);
     font: inherit;
     font-weight: 600;
     cursor: pointer;
@@ -626,7 +637,7 @@
   display: block;
   width: 100%;
   height: 12px;
-  accent-color: #1a1a1a;
+  accent-color: var(--northfold-color-accent);
 }
 
   .northfold-product__benefits {

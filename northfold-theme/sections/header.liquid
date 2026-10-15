@@ -51,8 +51,10 @@
     justify-content: space-between;
     gap: 16px;
     padding: 16px max(20px, 4%);
-    border-bottom: 1px solid #dcdcd6;
-    color: #1a1a1a;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-background);
+    color: var(--color-foreground);
+    font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
     line-height: 1.5;
   }
 
@@ -64,7 +66,8 @@
   .northfold-header__brand {
     font-size: 1.4rem;
     font-weight: 700;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
   }
 
   .northfold-header__nav {
@@ -81,11 +84,11 @@
   }
 
   .northfold-header__nav a {
-    color: #5f5f5a;
+    color: var(--color-muted);
   }
 
   .northfold-header__nav a:hover {
-    color: #1a1a1a;
+    color: var(--color-foreground);
     text-decoration: underline;
   }
 
@@ -102,17 +105,17 @@
 
   .northfold-header__cart {
     padding: 6px 16px;
-    border: 1px solid #dcdcd6;
-    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    border-radius: 0;
     font-weight: 600;
   }
 
   .northfold-header__cart:hover {
-    border-color: #1a1a1a;
+    border-color: var(--color-foreground);
   }
 
   .northfold-header :focus-visible {
-    outline: 3px solid #1d5fd1;
+    outline: 3px solid var(--color-focus);
     outline-offset: 3px;
   }
 
