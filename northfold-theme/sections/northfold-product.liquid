@@ -67,6 +67,37 @@
         <p class="northfold-product__price" aria-live="polite">
           {{ current_variant.price | money }}
         </p>
+        {% assign shipping_threshold = section.settings.free_shipping_threshold | times: 100 %}
+{% assign shipping_remaining = shipping_threshold | minus: cart.total_price %}
+{% assign shipping_progress = cart.total_price | times: 100.0 | divided_by: shipping_threshold | at_most: 100 %}
+
+<div
+  class="northfold-shipping"
+  data-shipping-threshold="{{ shipping_threshold }}"
+>
+  <p
+    class="northfold-shipping__message"
+    data-shipping-message
+    aria-live="polite"
+    aria-atomic="true"
+  >
+    {% if shipping_threshold == 0 or cart.total_price >= shipping_threshold %}
+      You've unlocked free shipping!
+    {% else %}
+      You are {{ shipping_remaining | money }} away from free shipping.
+    {% endif %}
+  </p>
+
+  <progress
+    class="northfold-shipping__progress"
+    data-shipping-progress
+    value="{{ shipping_progress | default: 0 }}"
+    max="100"
+    aria-label="Progress towards free shipping"
+  >
+    {{ shipping_progress | default: 0 }}%
+  </progress>
+</div>
 
         <div class="northfold-product__description">
           {{ product.description }}
@@ -444,6 +475,22 @@
     font-size: 0.9rem;
   }
 
+  .northfold-shipping {
+  margin-block: 16px 24px;
+}
+
+.northfold-shipping__message {
+  margin: 0 0 8px;
+  font-size: 0.95rem;
+}
+
+.northfold-shipping__progress {
+  display: block;
+  width: 100%;
+  height: 12px;
+  accent-color: #1a1a1a;
+}
+
   .northfold-product__benefits {
     padding-block: var(--northfold-space-xl);
     border-top: 1px solid var(--northfold-color-border);
@@ -534,11 +581,21 @@
       "default": "#FFFFFF"
     },
     {
-      "type": "checkbox",
-      "id": "show_quantity",
-      "label": "Show quantity input",
-      "default": true
-    }
+  "type": "checkbox",
+  "id": "show_quantity",
+  "label": "Show quantity input",
+  "default": true
+},
+{
+  "type": "range",
+  "id": "free_shipping_threshold",
+  "label": "Free shipping threshold",
+  "min": 0,
+  "max": 500,
+  "step": 5,
+  "unit": "$",
+  "default": 60
+}
   ],
   "blocks": [
     {
