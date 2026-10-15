@@ -120,13 +120,67 @@ function saveCart() {
 
 function renderCart() {
   el.count.textContent = cart.reduce((n, i) => n + i.quantity, 0);
-  el.items.replaceChildren(...cart.map((i) => {
+  if (!cart.length) {
     const li = document.createElement('li');
-    li.textContent = `${i.title} (${i.variantTitle}) × ${i.quantity} — ${money(i.amount * i.quantity, i.currency)}`;
-    return li;
-  }));
+    li.className = 'empty-cart-msg';
+    li.textContent = 'Your cart is empty.';
+    el.items.replaceChildren(li);
+  } else {
+    el.items.replaceChildren(...cart.map((i) => {
+      const li = document.createElement('li');
+      li.className = 'cart-item';
+      const info = document.createElement('div');
+      const t = document.createElement('p');
+      t.className = 'cart-item-title';
+      t.textContent = i.title;
+      const v = document.createElement('p');
+      v.className = 'cart-item-variant';
+      v.textContent = i.variantTitle;
+      const qty = document.createElement('div');
+      qty.className = 'qty-stepper';
+      const mk = (label, text, delta) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.textContent = text;
+        b.setAttribute('aria-label', `${label} ${i.title}`);
+        b.addEventListener('click', () => changeQty(i.variantId, delta));
+        return b;
+      };
+      const n = document.createElement('span');
+      n.textContent = i.quantity;
+      qty.append(mk('Decrease quantity of', '−', -1), n, mk('Increase quantity of', '+', 1));
+      info.append(t, v, qty);
+      const side = document.createElement('div');
+      side.className = 'cart-item-side';
+      const p = document.createElement('p');
+      p.className = 'cart-item-price';
+      p.textContent = money(i.amount * i.quantity, i.currency);
+      const rm = document.createElement('button');
+      rm.type = 'button';
+      rm.className = 'btn-remove';
+      rm.textContent = 'Remove';
+      rm.setAttribute('aria-label', `Remove ${i.title} (${i.variantTitle}) from cart`);
+      rm.addEventListener('click', () => removeItem(i.variantId));
+      side.append(p, rm);
+      li.append(info, side);
+      return li;
+    }));
+  }
   const currency = cart[0]?.currency || 'USD';
   el.subtotal.textContent = money(cart.reduce((s, i) => s + i.amount * i.quantity, 0), currency);
+}
+
+function removeItem(id) {
+  cart = cart.filter((i) => i.variantId !== id);
+  saveCart();
+}
+
+function changeQty(id, delta) {
+  const item = cart.find((i) => i.variantId === id);
+  if (!item) return;
+  item.quantity += delta;
+  if (item.quantity < 1) cart = cart.filter((i) => i !== item);
+  saveCart();
 }
 
 el.form.addEventListener('submit', (e) => {
@@ -142,9 +196,12 @@ el.form.addEventListener('submit', (e) => {
   el.added.textContent = `Added ${quantity} × ${selected.title} to cart.`;
 });
 
-$('cart-link').addEventListener('click', () => { el.drawer.hidden = !el.drawer.hidden; });
-$('cart-close').addEventListener('click', () => { el.drawer.hidden = true; });
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape') el.drawer.hidden = true; });
+const overlay = $('cart-overlay');
+const setDrawer = (open) => { el.drawer.hidden = !open; overlay.hidden = !open; };
+$('cart-link').addEventListener('click', () => setDrawer(el.drawer.hidden));
+$('cart-close').addEventListener('click', () => setDrawer(false));
+overlay.addEventListener('click', () => setDrawer(false));
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setDrawer(false); });
 
 renderCart();
 try {
