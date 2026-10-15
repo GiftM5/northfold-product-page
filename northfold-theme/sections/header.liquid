@@ -39,8 +39,8 @@
       </a>
     {% endif %}
     <a class="northfold-header__cart" href="{{ routes.cart_url }}">
-      Cart ({{ cart.item_count }})
-    </a>
+  Cart (<span data-cart-count>{{ cart.item_count }}</span>)
+</a>
   </div>
 </header>
 
