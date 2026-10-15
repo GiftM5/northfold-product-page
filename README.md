@@ -39,13 +39,9 @@ This project is a Shopify storefront theme developed for a snowboard store. It p
    shopify theme push --unpublished
    ```
 
-4. Preview the theme and test its appearance and functionality before submitting.
+4. Preview the theme and test its appearance and functionality.
 
-## Publishing
-
-This project is intended to be reviewed through an unpublished theme and preview link. Do not publish it to the live storefront as part of the development or review process.
-
-## Testing Checklist
+## Testing Checklist (What i used as a DOD)
 
 - Check the product page and product imagery.
 - Verify that all storefront copy relates to snowboarding.
