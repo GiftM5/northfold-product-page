@@ -1,0 +1,150 @@
+<header class="northfold-header full-width">
+  <a class="northfold-header__brand" href="{{ routes.root_url }}">
+    {{ shop.name | escape }}
+  </a>
+
+  <nav class="northfold-header__nav" aria-label="Main">
+    <ul>
+      {% if section.settings.menu != blank %}
+        {% for link in section.settings.menu.links %}
+          <li>
+            <a href="{{ link.url }}">{{ link.title | escape }}</a>
+          </li>
+        {% endfor %}
+      {% else %}
+        <li>
+          <a
+            href="{% if request.page_type == 'product' %}#product{% else %}{{ routes.all_products_collection_url }}{% endif %}"
+          >
+            Shop
+          </a>
+        </li>
+        <li>
+          <a href="{% if request.page_type == 'product' %}#benefits{% else %}{{ routes.root_url }}#benefits{% endif %}">
+            Our values
+          </a>
+        </li>
+      {% endif %}
+    </ul>
+  </nav>
+
+  <div class="northfold-header__actions">
+    {% if shop.customer_accounts_enabled %}
+      <a
+        class="northfold-header__account"
+        href="{{ routes.account_url }}"
+        aria-label="Account"
+      >
+        {{ 'icon-account.svg' | inline_asset_content }}
+      </a>
+    {% endif %}
+    <a class="northfold-header__cart" href="{{ routes.cart_url }}">
+  Cart (<span data-cart-count>{{ cart.item_count }}</span>)
+</a>
+  </div>
+</header>
+
+{% stylesheet %}
+  .northfold-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px max(20px, 4%);
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-background);
+    color: var(--color-foreground);
+    font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+    line-height: 1.5;
+  }
+
+  .northfold-header a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .northfold-header__brand {
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .northfold-header__nav {
+    margin-right: auto;
+    margin-left: 32px;
+  }
+
+  .northfold-header__nav ul {
+    display: flex;
+    gap: 32px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .northfold-header__nav a {
+    color: var(--color-muted);
+  }
+
+  .northfold-header__nav a:hover {
+    color: var(--color-foreground);
+    text-decoration: underline;
+  }
+
+  .northfold-header__actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .northfold-header__actions svg {
+    display: block;
+    width: 1.5rem;
+  }
+
+  .northfold-header__cart {
+    padding: 6px 16px;
+    border: 1px solid var(--color-border);
+    border-radius: 0;
+    font-weight: 600;
+  }
+
+  .northfold-header__cart:hover {
+    border-color: var(--color-foreground);
+  }
+
+  .northfold-header :focus-visible {
+    outline: 3px solid var(--color-focus);
+    outline-offset: 3px;
+  }
+
+  @media screen and (max-width: 749px) {
+    .northfold-header {
+      flex-wrap: wrap;
+    }
+
+    .northfold-header__nav {
+      order: 3;
+      width: 100%;
+      margin: 0;
+    }
+
+    .northfold-header__nav ul {
+      gap: 16px;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:general.header",
+  "settings": [
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "t:labels.menu"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,806 @@
+{% assign current_variant = product.selected_or_first_available_variant %}
+{% assign product_form_id = 'NorthfoldProductForm-' | append: section.id %}
+
+<section
+  id="product"
+  class="northfold-product full-width"
+  style="--northfold-product-background: {{ section.settings.background_color }};"
+>
+  {% if product == blank %}
+    <p class="northfold-product__empty">Please select a product to preview this section.</p>
+  {% else %}
+    <div class="northfold-product__layout">
+      <div class="northfold-product__gallery" aria-label="Product images">
+        {% if product.images.size > 0 %}
+          <div class="northfold-product__thumbs">
+            {% for image in product.images %}
+              <button
+                class="northfold-product__thumb"
+                type="button"
+                aria-label="Show image {{ forloop.index }} of {{ product.images.size }}"
+                aria-pressed="{% if forloop.first %}true{% else %}false{% endif %}"
+                data-gallery-target="NorthfoldImage-{{ section.id }}-{{ forloop.index }}"
+              >
+                {{
+                  image
+                  | image_url: width: 160
+                  | image_tag:
+                    widths: '64, 96, 128, 160',
+                    sizes: '64px',
+                    alt: '',
+                    loading: 'lazy'
+                }}
+              </button>
+            {% endfor %}
+          </div>
+
+          <div class="northfold-product__main-images">
+            {% for image in product.images %}
+              <div
+                id="NorthfoldImage-{{ section.id }}-{{ forloop.index }}"
+                class="northfold-product__main-image"
+                {% unless forloop.first %}
+                  hidden
+                {% endunless %}
+              >
+                {{
+                  image
+                  | image_url: width: 1600
+                  | image_tag:
+                    widths: '360, 540, 720, 960, 1200, 1600',
+                    sizes: '(min-width: 750px) min(58vw, 820px), calc(100vw - 40px)',
+                    alt: image.alt,
+                    loading: 'lazy'
+                }}
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="northfold-product__no-images">No product images are available.</p>
+        {% endif %}
+      </div>
+
+      <div class="northfold-product__details">
+        <p class="northfold-product__eyebrow">Everyday essentials</p>
+        <h1>{{ product.title | escape }}</h1>
+
+        <p class="northfold-product__price" aria-live="polite">
+          {{ current_variant.price | money }}
+        </p>
+{% assign shipping_threshold = section.settings.free_shipping_threshold | times: 100 %}
+{% assign shipping_remaining = shipping_threshold | minus: cart.total_price %}
+{% assign shipping_progress = 0 %}
+
+{% if shipping_threshold == 0 or cart.total_price >= shipping_threshold %}
+  {% assign shipping_progress = 100 %}
+{% else %}
+  {% assign shipping_progress = cart.total_price | times: 100.0 | divided_by: shipping_threshold | at_most: 100 %}
+{% endif %}
+
+<div
+  class="northfold-shipping"
+  data-shipping-threshold="{{ shipping_threshold }}"
+>
+  <p
+    class="northfold-shipping__message"
+    data-shipping-message
+    aria-live="polite"
+    aria-atomic="true"
+  >
+    {% if shipping_threshold == 0 or cart.total_price >= shipping_threshold %}
+      You've unlocked free shipping!
+    {% else %}
+      You are {{ shipping_remaining | money }} away from free shipping.
+    {% endif %}
+  </p>
+
+  <progress
+    class="northfold-shipping__progress"
+    data-shipping-progress
+    value="{{ shipping_progress | default: 0 }}"
+    max="100"
+    aria-label="Progress towards free shipping"
+  >
+    {{ shipping_progress | default: 0 }}%
+  </progress>
+</div>
+
+        <div class="northfold-product__description">
+          {{ product.description }}
+        </div>
+
+        {% form 'product', product, id: product_form_id %}
+          {% if product.has_only_default_variant %}
+            <input type="hidden" name="id" value="{{ current_variant.id }}">
+          {% else %}
+            <fieldset class="northfold-product__options">
+              <legend>
+                Option:
+                <span class="northfold-product__variant-name">
+                  {{ current_variant.title | escape }}
+                </span>
+              </legend>
+
+              <div class="northfold-product__variants">
+                {% for variant in product.variants %}
+                  <label
+                    class="northfold-product__variant"
+                    for="NorthfoldVariant-{{ section.id }}-{{ forloop.index }}"
+                  >
+                    <input
+                      id="NorthfoldVariant-{{ section.id }}-{{ forloop.index }}"
+                      type="radio"
+                      name="id"
+                      value="{{ variant.id }}"
+                      data-price="{{ variant.price | money | escape }}"
+                      data-available="{{ variant.available }}"
+                      data-title="{{ variant.title | escape }}"
+                      {% if variant.id == current_variant.id %}
+                        checked
+                      {% endif %}
+                      {% unless variant.available %}
+                        disabled
+                      {% endunless %}
+                    >
+                    <span>{{ variant.title | escape }}</span>
+                  </label>
+                {% endfor %}
+              </div>
+            </fieldset>
+          {% endif %}
+
+          {% if section.settings.show_quantity %}
+            <div class="northfold-product__quantity">
+              <label for="NorthfoldQuantity-{{ section.id }}">Quantity</label>
+              <input
+                id="NorthfoldQuantity-{{ section.id }}"
+                type="number"
+                name="quantity"
+                min="1"
+                value="1"
+                required
+              >
+            </div>
+          {% endif %}
+
+          <button
+            class="northfold-product__submit"
+            type="submit"
+            name="add"
+            {% unless current_variant.available %}
+              disabled
+            {% endunless %}
+          >
+            {% if current_variant.available %}
+              Add to cart
+            {% else %}
+              Sold out
+            {% endif %}
+          </button>
+          <p class="northfold-product__added" role="status" aria-live="polite"></p>
+        {% endform %}
+      </div>
+    </div>
+  {% endif %}
+
+  {% if section.settings.show_recently_viewed %}
+    {% render 'recently-viewed',
+      heading: section.settings.recently_viewed_heading,
+      id: section.id
+    %}
+  {% endif %}
+
+  {% render 'northfold-benefits',
+    heading: section.settings.benefits_heading,
+    blocks: section.blocks
+  %}
+</section>
+
+{% javascript %}
+  document.addEventListener('click', (event) => {
+    const button = event.target.closest('.northfold-product__thumb');
+
+    if (!button) {
+      return;
+    }
+
+    const gallery = button.closest('.northfold-product__gallery');
+    const targetId = button.dataset.galleryTarget;
+    const targetImage = targetId ? document.getElementById(targetId) : null;
+
+    if (!gallery || !targetImage || !gallery.contains(targetImage)) {
+      return;
+    }
+
+    gallery.querySelectorAll('.northfold-product__main-image').forEach((image) => {
+      image.hidden = image !== targetImage;
+    });
+    gallery.querySelectorAll('.northfold-product__thumb').forEach((thumb) => {
+      thumb.setAttribute('aria-pressed', String(thumb === button));
+    });
+  });
+
+  document.addEventListener('change', (event) => {
+    const input = event.target;
+
+    if (!(input instanceof HTMLInputElement) || input.type !== 'radio' || input.name !== 'id') {
+      return;
+    }
+
+    const productSection = input.closest('.northfold-product');
+    const price = productSection?.querySelector('.northfold-product__price');
+    const variantName = productSection?.querySelector('.northfold-product__variant-name');
+    const submitButton = productSection?.querySelector('.northfold-product__submit');
+
+    if (!price || !variantName || !submitButton) {
+      return;
+    }
+
+    price.textContent = input.dataset.price ?? '';
+    variantName.textContent = input.dataset.title ?? '';
+    submitButton.disabled = input.dataset.available !== 'true';
+    submitButton.textContent = submitButton.disabled ? 'Sold out' : 'Add to cart';
+  });
+
+  document.addEventListener('submit', async (event) => {
+  const form = event.target;
+
+  if (!(form instanceof HTMLFormElement)) {
+    return;
+  }
+
+  const productSection = form.closest('.northfold-product');
+
+  if (!productSection) {
+    return;
+  }
+
+  event.preventDefault();
+
+  const submitButton = form.querySelector('.northfold-product__submit');
+  const status = form.querySelector('.northfold-product__added');
+
+  if (!submitButton || !status || submitButton.disabled) {
+    return;
+  }
+
+  const originalButtonText = submitButton.textContent.trim();
+  submitButton.disabled = true;
+  submitButton.textContent = 'Adding…';
+  status.textContent = '';
+
+  try {
+    const formData = new FormData(form);
+
+    if (!formData.has('quantity')) {
+      formData.set('quantity', '1');
+    }
+
+    const addResponse = await fetch(
+      `${window.Shopify.routes.root}cart/add.js`,
+      {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json'
+        },
+        body: formData
+      }
+    );
+
+    const addResult = await addResponse.json();
+
+    if (!addResponse.ok) {
+      throw new Error(
+        addResult.description ||
+        addResult.message ||
+        'We could not add this item to your cart.'
+      );
+    }
+
+    status.textContent = 'Added to cart successfully!';
+
+    try {
+      const cartResponse = await fetch(
+        `${window.Shopify.routes.root}cart.js`,
+        {
+          headers: {
+            Accept: 'application/json'
+          }
+        }
+      );
+
+      if (!cartResponse.ok) {
+        throw new Error('Could not refresh cart details.');
+      }
+
+      const cart = await cartResponse.json();
+
+      document.querySelectorAll('[data-cart-count]').forEach((count) => {
+        count.textContent = cart.item_count;
+      });
+
+      const shippingBar = document.querySelector('.northfold-shipping');
+
+      if (shippingBar) {
+        const threshold = Number(shippingBar.dataset.shippingThreshold);
+        const total = Number(cart.total_price);
+        const message = shippingBar.querySelector('[data-shipping-message]');
+        const progress = shippingBar.querySelector('[data-shipping-progress]');
+
+        if (message && progress && Number.isFinite(threshold) && threshold >= 0) {
+          const reached = threshold === 0 || total >= threshold;
+          const remaining = Math.max(0, threshold - total);
+          const percentage = threshold === 0
+            ? 100
+            : Math.min(100, (total / threshold) * 100);
+
+          const currency = window.Shopify.currency?.active || 'USD';
+          const formatter = new Intl.NumberFormat(undefined, {
+            style: 'currency',
+            currency
+          });
+
+          message.textContent = reached
+            ? "You've unlocked free shipping!"
+            : `You are ${formatter.format(remaining / 100)} away from free shipping.`;
+
+          progress.max = 100;
+          progress.value = percentage;
+          progress.textContent = `${Math.round(percentage)}%`;
+        }
+      }
+    } catch (refreshError) {
+      console.error('Cart refresh failed:', refreshError);
+    }
+  } catch (error) {
+    status.textContent = error instanceof Error
+      ? error.message
+      : 'Something went wrong. Please try again.';
+  } finally {
+    submitButton.disabled = false;
+
+    const selectedVariant = form.querySelector('[name="id"]:checked')
+      || form.querySelector('[name="id"]');
+
+    const available = selectedVariant instanceof HTMLInputElement
+      ? selectedVariant.dataset.available !== 'false'
+      : true;
+
+    submitButton.textContent = available
+      ? originalButtonText === 'Adding…' ? 'Add to cart' : originalButtonText
+      : 'Sold out';
+
+    submitButton.disabled = !available;
+  }
+});
+{% endjavascript %}
+
+{% stylesheet %}
+  .northfold-product {
+    --northfold-color-background: var(--color-background);
+    --northfold-color-surface: var(--color-surface);
+    --northfold-color-text: var(--color-foreground);
+    --northfold-color-muted: var(--color-muted);
+    --northfold-color-border: var(--color-border);
+    --northfold-color-focus: var(--color-focus);
+    --northfold-color-accent: var(--color-accent);
+    --northfold-color-on-accent: var(--color-on-accent);
+    --northfold-space-small: 8px;
+    --northfold-space-medium: 16px;
+    --northfold-space-large: 32px;
+    --northfold-space-xl: 56px;
+    --northfold-radius-small: 0;
+    --northfold-radius-pill: 0;
+    background: var(--northfold-product-background, var(--northfold-color-background));
+    color: var(--northfold-color-text);
+    font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+    line-height: 1.5;
+    padding-top: var(--northfold-space-medium);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .northfold-product {
+      background: var(--northfold-color-background);
+    }
+  }
+
+  .northfold-product__layout,
+  .northfold-product__benefits {
+    width: min(calc(100% - 40px), 1280px);
+    margin-inline: auto;
+  }
+
+  .northfold-product__layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    gap: var(--northfold-space-xl);
+    align-items: start;
+    padding-bottom: var(--northfold-space-xl);
+  }
+
+  .northfold-product__gallery {
+    display: grid;
+    grid-template-columns: 80px minmax(0, 1fr);
+    gap: var(--northfold-space-medium);
+    align-items: start;
+    min-width: 0;
+  }
+
+  .northfold-product__thumbs {
+    grid-column: 1;
+    grid-row: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--northfold-space-small);
+  }
+
+  .northfold-product__thumb {
+    display: block;
+    width: 100%;
+    padding: 0;
+    overflow: hidden;
+    border: 2px solid transparent;
+    border-radius: var(--northfold-radius-small);
+    background: var(--northfold-color-surface);
+    cursor: pointer;
+  }
+
+  .northfold-product__thumb:hover {
+    border-color: var(--northfold-color-border);
+  }
+
+  .northfold-product__thumb[aria-pressed='true'] {
+    border-color: var(--northfold-color-text);
+  }
+
+  .northfold-product__thumb img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+  }
+
+  .northfold-product__main-images {
+    grid-column: 2;
+    grid-row: 1;
+    min-width: 0;
+  }
+
+  .northfold-product__main-image img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: var(--northfold-radius-small);
+    background: var(--northfold-color-surface);
+  }
+
+  .northfold-product__details {
+    position: sticky;
+    top: var(--northfold-space-medium);
+    min-width: 0;
+  }
+
+  .northfold-product__eyebrow {
+    margin: 0;
+    color: var(--northfold-color-muted);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .northfold-product__details h1 {
+    margin: var(--northfold-space-small) 0;
+    font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+  }
+
+  .northfold-product__price {
+    margin: 0 0 var(--northfold-space-medium);
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+
+  .northfold-product__description {
+    max-width: 55ch;
+    margin-bottom: var(--northfold-space-large);
+    color: var(--northfold-color-muted);
+  }
+
+  .northfold-product__details form {
+    display: grid;
+    gap: var(--northfold-space-medium);
+  }
+
+  .northfold-product__options {
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .northfold-product__options legend {
+    margin-bottom: var(--northfold-space-small);
+    padding: 0;
+    font-weight: 600;
+  }
+
+  .northfold-product__variant-name {
+    color: var(--northfold-color-muted);
+    font-weight: 400;
+  }
+
+  .northfold-product__variants {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--northfold-space-small);
+  }
+
+  .northfold-product__variant {
+    position: relative;
+    cursor: pointer;
+  }
+
+  .northfold-product__variant input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .northfold-product__variant span {
+    display: block;
+    padding: 10px 18px;
+    border: 1px solid var(--northfold-color-border);
+    border-radius: var(--northfold-radius-pill);
+    font-size: 0.95rem;
+  }
+
+  .northfold-product__variant:hover span {
+    border-color: var(--northfold-color-text);
+  }
+
+  .northfold-product__variant input:checked + span {
+    border-color: var(--northfold-color-accent);
+    background: var(--northfold-color-accent);
+    color: var(--northfold-color-on-accent);
+  }
+
+  .northfold-product__variant input:focus-visible + span {
+    outline: 3px solid var(--northfold-color-focus);
+    outline-offset: 3px;
+  }
+
+  .northfold-product__variant input:disabled + span {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .northfold-product__quantity {
+    display: grid;
+    gap: var(--northfold-space-small);
+  }
+
+  .northfold-product__quantity label {
+    font-weight: 600;
+  }
+
+  .northfold-product__quantity input {
+    box-sizing: border-box;
+    width: 120px;
+    max-width: 100%;
+    padding: 12px;
+    border: 1px solid var(--northfold-color-border);
+    border-radius: var(--northfold-radius-small);
+    background: var(--northfold-color-background);
+    color: var(--northfold-color-text);
+    font: inherit;
+  }
+
+  .northfold-product__submit {
+    width: 100%;
+    padding: 16px 20px;
+    border: 0;
+    border-radius: var(--northfold-radius-pill);
+    background: var(--northfold-color-accent);
+    color: var(--northfold-color-on-accent);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .northfold-product__submit:hover {
+    opacity: 0.85;
+  }
+
+  .northfold-product__submit:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+
+  .northfold-product__added {
+    min-height: 1.5em;
+    margin: 0;
+    color: var(--northfold-color-muted);
+    font-size: 0.9rem;
+  }
+
+  .northfold-shipping {
+  margin-block: 16px 24px;
+}
+
+.northfold-shipping__message {
+  margin: 0 0 8px;
+  font-size: 0.95rem;
+}
+
+.northfold-shipping__progress {
+  display: block;
+  width: 100%;
+  height: 12px;
+  accent-color: var(--northfold-color-accent);
+}
+
+  .northfold-product__benefits {
+    padding-block: var(--northfold-space-xl);
+    border-top: 1px solid var(--northfold-color-border);
+  }
+
+  .northfold-product__benefits h2 {
+    margin: 0 0 var(--northfold-space-large);
+    text-align: center;
+  }
+
+  .northfold-product__benefit-list {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--northfold-space-medium);
+  }
+
+  .northfold-product__benefit {
+    padding: var(--northfold-space-large);
+    border-radius: var(--northfold-radius-small);
+    background: var(--northfold-color-surface);
+  }
+
+  .northfold-product__benefit h3 {
+    margin: 0 0 var(--northfold-space-medium);
+  }
+
+  .northfold-product__benefit p {
+    margin-bottom: 0;
+    color: var(--northfold-color-muted);
+  }
+
+  .northfold-product :focus-visible {
+    outline-color: var(--northfold-color-focus);
+    outline-offset: 3px;
+  }
+
+  @media screen and (max-width: 749px) {
+    .northfold-product__layout {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--northfold-space-large);
+    }
+
+    .northfold-product__details {
+      position: static;
+    }
+
+    .northfold-product__gallery {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .northfold-product__thumbs {
+      grid-column: 1;
+      grid-row: 2;
+      flex-direction: row;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .northfold-product__thumb {
+      flex: 0 0 64px;
+    }
+
+    .northfold-product__main-images {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    .northfold-product__benefit-list {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Northfold product",
+  "settings": [
+    {
+      "type": "text",
+      "id": "benefits_heading",
+      "label": "Benefits heading",
+      "default": "Made for everyday moments"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_recently_viewed",
+      "label": "Show recently viewed products",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "recently_viewed_heading",
+      "label": "Recently viewed heading",
+      "default": "Recently viewed"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background colour",
+      "default": "#FFFFFF"
+    },
+    {
+  "type": "checkbox",
+  "id": "show_quantity",
+  "label": "Show quantity input",
+  "default": true
+},
+{
+  "type": "range",
+  "id": "free_shipping_threshold",
+  "label": "Free shipping threshold",
+  "min": 0,
+  "max": 500,
+  "step": 5,
+  "unit": "$",
+  "default": 60
+}
+  ],
+  "blocks": [
+    {
+      "type": "benefit",
+      "name": "Benefit",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Benefit title",
+          "default": "Thoughtful design"
+        },
+        {
+          "type": "textarea",
+          "id": "text",
+          "label": "Benefit text",
+          "default": "Designed to fit into everyday life."
+        }
+      ]
+    }
+  ],
+  "max_blocks": 6,
+  "presets": [
+    {
+      "name": "Northfold product",
+      "blocks": [
+        {
+          "type": "benefit"
+        },
+        {
+          "type": "benefit"
+        },
+        {
+          "type": "benefit"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,87 @@
+.recently-viewed {
+  padding-block: 56px;
+  border-top: 1px solid var(--color-border);
+}
+
+.recently-viewed[hidden] {
+  display: none;
+}
+
+.recently-viewed__inner {
+  width: min(calc(100% - 40px), 1280px);
+  margin-inline: auto;
+}
+
+.recently-viewed__heading {
+  margin: 0 0 32px;
+  text-align: center;
+}
+
+.recently-viewed__list {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 24px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.recently-viewed__item {
+  position: relative;
+  min-width: 0;
+}
+
+.recently-viewed__media img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  background: var(--color-surface);
+}
+
+.recently-viewed__title {
+  display: block;
+  margin-top: 12px;
+  color: var(--color-foreground);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* Stretches the title link over the whole card. */
+.recently-viewed__title::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+
+.recently-viewed__title:hover {
+  text-decoration: underline;
+}
+
+.recently-viewed__title:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.recently-viewed__price {
+  margin: 4px 0 0;
+  color: var(--color-muted);
+}
+
+.recently-viewed__placeholder {
+  display: none;
+  margin: 0;
+  color: var(--color-muted);
+  text-align: center;
+}
+
+.recently-viewed--empty .recently-viewed__placeholder {
+  display: block;
+}
+
+@media (max-width: 749px) {
+  .recently-viewed__list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+}

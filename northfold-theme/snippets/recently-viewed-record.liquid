@@ -1,0 +1,13 @@
+{% doc %}
+  Marks a product page so that assets/recently-viewed.js stores the product
+  in the shopper's browser. Renders nothing visible.
+
+  @param {product} product - The product being viewed
+
+  @example
+  {% render 'recently-viewed-record', product: product %}
+{% enddoc %}
+
+{% if product != blank %}
+  <span hidden data-recently-viewed-record data-handle="{{ product.handle | escape }}"></span>
+{% endif %}

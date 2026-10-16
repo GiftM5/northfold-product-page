@@ -1,0 +1,39 @@
+{% style %}
+  {% # Loads all font variantions with display: swap %}
+  {{ settings.type_primary_font | font_face: font_display: 'swap' }}
+  {{ settings.type_primary_font | font_modify: 'weight', 'bold' | font_face: font_display: 'swap' }}
+  {{ settings.type_primary_font | font_modify: 'weight', 'bold' | font_modify: 'style', 'italic' | font_face: font_display: 'swap' }}
+  {{ settings.type_primary_font | font_modify: 'style', 'italic' | font_face: font_display: 'swap' }}
+
+  :root {
+    --font-primary--family: {{ settings.type_primary_font.family }}, {{ settings.type_primary_font.fallback_families }};
+    --font-primary--style: {{ settings.type_primary_font.style }};
+    --font-primary--weight: {{ settings.type_primary_font.weight }};
+    --page-width: {{ settings.max_page_width }};
+    --page-margin: {{ settings.min_page_margin }}px;
+    --color-background: {{ settings.background_color }};
+    --color-foreground: {{ settings.foreground_color }};
+    --style-border-radius-inputs: {{ settings.input_corner_radius }}px;
+    --color-surface: #f3f3f3;
+    --color-muted: #6b6b6b;
+    --color-accent: #121212;
+    --color-on-accent: #ffffff;
+    --color-border: #dcdcd6;
+    --color-error: #a12d2d;
+    --color-focus: #1d5fd1;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-background: #121212;
+      --color-foreground: #f2f2ee;
+      --color-surface: #1e1e1d;
+      --color-muted: #b5b5ad;
+      --color-accent: #f2f2ee;
+      --color-on-accent: #121212;
+      --color-border: #3a3a37;
+      --color-error: #ff8f8f;
+      --color-focus: #7fb0ff;
+    }
+  }
+{% endstyle %}

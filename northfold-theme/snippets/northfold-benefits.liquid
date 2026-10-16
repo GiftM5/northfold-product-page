@@ -1,0 +1,17 @@
+<div id="benefits" class="northfold-product__benefits">
+  {% if heading != blank %}
+    <h2>{{ heading | escape }}</h2>
+  {% endif %}
+
+  <div class="northfold-product__benefit-list">
+    {% for block in blocks %}
+      <article
+        class="northfold-product__benefit"
+        {{ block.shopify_attributes }}
+      >
+        <h3>{{ block.settings.title | escape }}</h3>
+        <p>{{ block.settings.text | escape }}</p>
+      </article>
+    {% endfor %}
+  </div>
+</div>

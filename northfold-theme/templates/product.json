@@ -1,0 +1,40 @@
+
+{
+  "sections": {
+    "main": {
+      "type": "northfold-product",
+      "settings": {},
+      "blocks": {
+        "benefit_1": {
+          "type": "benefit",
+          "settings": {
+            "title": "Thoughtful design",
+            "text": "Simple forms designed to fit into everyday life."
+          }
+        },
+        "benefit_2": {
+          "type": "benefit",
+          "settings": {
+            "title": "Stoneware character",
+            "text": "A tactile finish that gives each piece its own character."
+          }
+        },
+        "benefit_3": {
+          "type": "benefit",
+          "settings": {
+            "title": "Everyday ritual",
+            "text": "A companion for your morning coffee or evening tea."
+          }
+        }
+      },
+      "block_order": [
+        "benefit_1",
+        "benefit_2",
+        "benefit_3"
+      ]
+    }
+  },
+  "order": [
+    "main"
+  ]
+}
