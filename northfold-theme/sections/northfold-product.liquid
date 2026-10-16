@@ -183,6 +183,13 @@
     </div>
   {% endif %}
 
+  {% if section.settings.show_recently_viewed %}
+    {% render 'recently-viewed',
+      heading: section.settings.recently_viewed_heading,
+      id: section.id
+    %}
+  {% endif %}
+
   {% render 'northfold-benefits',
     heading: section.settings.benefits_heading,
     blocks: section.blocks
@@ -722,6 +729,18 @@
       "id": "benefits_heading",
       "label": "Benefits heading",
       "default": "Made for everyday moments"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_recently_viewed",
+      "label": "Show recently viewed products",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "recently_viewed_heading",
+      "label": "Recently viewed heading",
+      "default": "Recently viewed"
     },
     {
       "type": "color",
