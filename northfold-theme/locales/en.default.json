@@ -42,6 +42,10 @@
     "password": "Password",
     "enter": "Enter"
   },
+  "recently_viewed": {
+    "from": "From",
+    "editor_placeholder": "Products a shopper has viewed will appear here. This message is only visible in the theme editor."
+  },
   "search": {
     "title": "Search",
     "placeholder": "Search articles, pages, or products",
