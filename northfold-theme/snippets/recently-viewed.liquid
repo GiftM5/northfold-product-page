@@ -1,0 +1,48 @@
+{% doc %}
+  Renders the Recently viewed block. It stays hidden until
+  assets/recently-viewed.js finds earlier products to show, and is visible as
+  a placeholder in the theme editor.
+
+  @param {string} [heading] - Heading text; omitted when blank
+  @param {string} id - Unique id used for the heading, usually the section id
+
+  @example
+  {% render 'recently-viewed', heading: section.settings.heading, id: section.id %}
+{% enddoc %}
+
+{% liquid
+  assign current_handle = ''
+  if template.name == 'product'
+    assign current_handle = product.handle
+  endif
+%}
+
+<div
+  class="recently-viewed"
+  data-recently-viewed
+  data-current-handle="{{ current_handle | escape }}"
+  data-root-url="{{ routes.root_url }}"
+  data-currency="{{ cart.currency.iso_code }}"
+  data-locale="{{ request.locale.iso_code }}"
+  data-from-label="{{ 'recently_viewed.from' | t | escape }}"
+  data-design-mode="{{ request.design_mode }}"
+  {% if heading != blank %}
+    role="region"
+    aria-labelledby="RecentlyViewedHeading-{{ id }}"
+  {% endif %}
+  hidden
+>
+  <div class="recently-viewed__inner">
+    {% if heading != blank %}
+      <h2 id="RecentlyViewedHeading-{{ id }}" class="recently-viewed__heading">
+        {{- heading | escape -}}
+      </h2>
+    {% endif %}
+
+    <ul class="recently-viewed__list" data-recently-viewed-list role="list"></ul>
+
+    {% if request.design_mode %}
+      <p class="recently-viewed__placeholder">{{ 'recently_viewed.editor_placeholder' | t }}</p>
+    {% endif %}
+  </div>
+</div>
