@@ -11,10 +11,17 @@
     {% render 'meta-tags' %}
 
     {{ content_for_header }}
+
+    {{ 'recently-viewed.css' | asset_url | stylesheet_tag }}
+    <script src="{{ 'recently-viewed.js' | asset_url }}" defer="defer"></script>
   </head>
 
   <body>
     {% sections 'header-group' %}
+
+    {% if template.name == 'product' %}
+      {% render 'recently-viewed-record', product: product %}
+    {% endif %}
 
     {{ content_for_layout }}
 
